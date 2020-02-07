@@ -1,6 +1,6 @@
 {
 	"name": "@dependency/handleProcess",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"main": "./entrypoint/programmaticAPI",
 	"scripts": {
 		"buildAndRelease": "yarn run scriptManager shouldCompileScript=true @deployment/deploymentScript \".buildAndRelease.moduleProject({})\"",
