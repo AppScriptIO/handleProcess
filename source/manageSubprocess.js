@@ -1,73 +1,74 @@
-import EventEmitter from 'events'
-import childProcess from 'child_process'
+"use strict";var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports, "__esModule", { value: true });exports.ManageSubprocess = void 0;var _events = _interopRequireDefault(require("events"));
+var _child_process = _interopRequireDefault(require("child_process"));
 
-// manage forked subprocess allowing to restart the subprocess on demand.
-// Process signals - http://man7.org/linux/man-pages/man7/signal.7.html
-export class ManageSubprocess extends EventEmitter {
-  static subprocessList = []
+
+
+class ManageSubprocess extends _events.default {
+
 
   static terminateSubprocess() {
     for (let subprocess of ManageSubprocess.subprocessList) {
       if (!subprocess.killed) {
-        // console.log('sending kill to subprocess ' + subprocess.pid)
-        subprocess.kill('SIGTERM')
+
+        subprocess.kill('SIGTERM');
       }
     }
   }
 
-  subprocess // child subprocess
-  cliAdapterPath // the path to the cli entrypoint file, that will receive arguments from the child process fork function and pass it to the programmatic module api.
-  argumentList // cached arguments to be used for running subprocesses
+
+
+
 
   constructor({ cliAdapterPath }) {
-    super()
-    this.cliAdapterPath = cliAdapterPath
-    this.suprocess = null
+    super();
+    this.cliAdapterPath = cliAdapterPath;
+    this.suprocess = null;
   }
 
   runInSubprocess() {
-    if (this.subprocess) this.subprocess.kill('SIGTERM')
+    if (this.subprocess) this.subprocess.kill('SIGTERM');
 
-    this.argumentList = [...(arguments.length == 0 ? this.argumentList || [] : arguments)]
+    this.argumentList = [...(arguments.length == 0 ? this.argumentList || [] : arguments)];
 
-    let stringifyArgs = JSON.stringify(this.argumentList) // parametrs for module to be run in subprocess.
+    let stringifyArgs = JSON.stringify(this.argumentList);
 
-    // running in subprocess prevents allows to control the application and terminate it when needed.
-    console.log(`• Executing subprocess: "${this.cliAdapterPath} ${stringifyArgs}"`)
-    this.subprocess = childProcess
-      .fork(this.cliAdapterPath, [stringifyArgs], {
-        stdio: [0, 1, 2, 'ipc'],
-        execArgv: [
-          // '--inspect-brk=1272', // inspect subprocess with random port to prevent conflicts with the main process in case it's inspect flag was turned on.
-          '--no-lazy', // for debugging purposes will load modules sequentially
-        ],
-      })
-      .on('message', message => {
-        if (message?.status == 'ready') this.emit('ready')
-      })
-      .on('close', code => {
-        if (code === 8) console.error('Error detected, waiting for changes.')
-      })
-    // childProcess.unref() // prevent parent from waiting to child process and un reference child from parent's event loop. When child process is referenced it forces the parent to wait for the child to exit before exiting itself.
 
-    this.subprocess.on('exit', (code, signal) => console.log(`[Subprocess ${this.subprocess.pid}]: signal ${signal}, code ${code};`))
+    console.log(`• Executing subprocess: "${this.cliAdapterPath} ${stringifyArgs}"`);
+    this.subprocess = _child_process.default.
+    fork(this.cliAdapterPath, [stringifyArgs], {
+      stdio: [0, 1, 2, 'ipc'],
+      execArgv: [
 
-    ManageSubprocess.subprocessList.push(this.subprocess)
+      '--no-lazy'] }).
 
-    return this.subprocess
-  }
-}
 
-// clean up if an error goes unhandled or interrupt signal received.
-// TODO: make sure the hooks for process events are not executed.
-// process.exit(0) // process.abort()  // process.kill()
-// process.on('exit', (code, signal) => {
-//   console.log(`[Process ${process.pid}]: signal ${signal}, code ${code};`)
-//   ManageSubprocess.terminateSubprocess()
-// })
-// process.on('close', (code, signal) => console.log(`[Process ${process.pid}]: signal ${signal}, code ${code};`))
-// process.on('SIGTERM', (code, signal) => console.log(`[Process ${process.pid}]: signal ${signal}, code ${code};`))
+    on('message', message => {
+      if ((message === null || message === void 0 ? void 0 : message.status) == 'ready') this.emit('ready');
+    }).
+    on('close', code => {
+      if (code === 8) console.error('Error detected, waiting for changes.');
+    });
+
+
+    this.subprocess.on('exit', (code, signal) => console.log(`[Subprocess ${this.subprocess.pid}]: signal ${signal}, code ${code};`));
+
+    ManageSubprocess.subprocessList.push(this.subprocess);
+
+    return this.subprocess;
+  }}exports.ManageSubprocess = ManageSubprocess;ManageSubprocess.subprocessList = [];
+
+
+
+
+
+
+
+
+
+
+
 process.on('SIGINT', (code, signal) => {
-  console.log(`[Process ${process.pid}]: signal ${signal}, code ${code};`)
-  ManageSubprocess.terminateSubprocess()
-})
+  console.log(`[Process ${process.pid}]: signal ${signal}, code ${code};`);
+  ManageSubprocess.terminateSubprocess();
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NvdXJjZS9tYW5hZ2VTdWJwcm9jZXNzLmpzIl0sIm5hbWVzIjpbIk1hbmFnZVN1YnByb2Nlc3MiLCJFdmVudEVtaXR0ZXIiLCJ0ZXJtaW5hdGVTdWJwcm9jZXNzIiwic3VicHJvY2VzcyIsInN1YnByb2Nlc3NMaXN0Iiwia2lsbGVkIiwia2lsbCIsImNvbnN0cnVjdG9yIiwiY2xpQWRhcHRlclBhdGgiLCJzdXByb2Nlc3MiLCJydW5JblN1YnByb2Nlc3MiLCJhcmd1bWVudExpc3QiLCJhcmd1bWVudHMiLCJsZW5ndGgiLCJzdHJpbmdpZnlBcmdzIiwiSlNPTiIsInN0cmluZ2lmeSIsImNvbnNvbGUiLCJsb2ciLCJjaGlsZFByb2Nlc3MiLCJmb3JrIiwic3RkaW8iLCJleGVjQXJndiIsIm9uIiwibWVzc2FnZSIsInN0YXR1cyIsImVtaXQiLCJjb2RlIiwiZXJyb3IiLCJzaWduYWwiLCJwaWQiLCJwdXNoIiwicHJvY2VzcyJdLCJtYXBwaW5ncyI6ImtNQUFBO0FBQ0E7Ozs7QUFJTyxNQUFNQSxnQkFBTixTQUErQkMsZUFBL0IsQ0FBNEM7OztBQUdqRCxTQUFPQyxtQkFBUCxHQUE2QjtBQUMzQixTQUFLLElBQUlDLFVBQVQsSUFBdUJILGdCQUFnQixDQUFDSSxjQUF4QyxFQUF3RDtBQUN0RCxVQUFJLENBQUNELFVBQVUsQ0FBQ0UsTUFBaEIsRUFBd0I7O0FBRXRCRixRQUFBQSxVQUFVLENBQUNHLElBQVgsQ0FBZ0IsU0FBaEI7QUFDRDtBQUNGO0FBQ0Y7Ozs7OztBQU1EQyxFQUFBQSxXQUFXLENBQUMsRUFBRUMsY0FBRixFQUFELEVBQXFCO0FBQzlCO0FBQ0EsU0FBS0EsY0FBTCxHQUFzQkEsY0FBdEI7QUFDQSxTQUFLQyxTQUFMLEdBQWlCLElBQWpCO0FBQ0Q7O0FBRURDLEVBQUFBLGVBQWUsR0FBRztBQUNoQixRQUFJLEtBQUtQLFVBQVQsRUFBcUIsS0FBS0EsVUFBTCxDQUFnQkcsSUFBaEIsQ0FBcUIsU0FBckI7O0FBRXJCLFNBQUtLLFlBQUwsR0FBb0IsQ0FBQyxJQUFJQyxTQUFTLENBQUNDLE1BQVYsSUFBb0IsQ0FBcEIsR0FBd0IsS0FBS0YsWUFBTCxJQUFxQixFQUE3QyxHQUFrREMsU0FBdEQsQ0FBRCxDQUFwQjs7QUFFQSxRQUFJRSxhQUFhLEdBQUdDLElBQUksQ0FBQ0MsU0FBTCxDQUFlLEtBQUtMLFlBQXBCLENBQXBCOzs7QUFHQU0sSUFBQUEsT0FBTyxDQUFDQyxHQUFSLENBQWEsNEJBQTJCLEtBQUtWLGNBQWUsSUFBR00sYUFBYyxHQUE3RTtBQUNBLFNBQUtYLFVBQUwsR0FBa0JnQjtBQUNmQyxJQUFBQSxJQURlLENBQ1YsS0FBS1osY0FESyxFQUNXLENBQUNNLGFBQUQsQ0FEWCxFQUM0QjtBQUMxQ08sTUFBQUEsS0FBSyxFQUFFLENBQUMsQ0FBRCxFQUFJLENBQUosRUFBTyxDQUFQLEVBQVUsS0FBVixDQURtQztBQUUxQ0MsTUFBQUEsUUFBUSxFQUFFOztBQUVSLGlCQUZRLENBRmdDLEVBRDVCOzs7QUFRZkMsSUFBQUEsRUFSZSxDQVFaLFNBUlksRUFRREMsT0FBTyxJQUFJO0FBQ3hCLFVBQUksQ0FBQUEsT0FBTyxTQUFQLElBQUFBLE9BQU8sV0FBUCxZQUFBQSxPQUFPLENBQUVDLE1BQVQsS0FBbUIsT0FBdkIsRUFBZ0MsS0FBS0MsSUFBTCxDQUFVLE9BQVY7QUFDakMsS0FWZTtBQVdmSCxJQUFBQSxFQVhlLENBV1osT0FYWSxFQVdISSxJQUFJLElBQUk7QUFDbkIsVUFBSUEsSUFBSSxLQUFLLENBQWIsRUFBZ0JWLE9BQU8sQ0FBQ1csS0FBUixDQUFjLHNDQUFkO0FBQ2pCLEtBYmUsQ0FBbEI7OztBQWdCQSxTQUFLekIsVUFBTCxDQUFnQm9CLEVBQWhCLENBQW1CLE1BQW5CLEVBQTJCLENBQUNJLElBQUQsRUFBT0UsTUFBUCxLQUFrQlosT0FBTyxDQUFDQyxHQUFSLENBQWEsZUFBYyxLQUFLZixVQUFMLENBQWdCMkIsR0FBSSxhQUFZRCxNQUFPLFVBQVNGLElBQUssR0FBaEYsQ0FBN0M7O0FBRUEzQixJQUFBQSxnQkFBZ0IsQ0FBQ0ksY0FBakIsQ0FBZ0MyQixJQUFoQyxDQUFxQyxLQUFLNUIsVUFBMUM7O0FBRUEsV0FBTyxLQUFLQSxVQUFaO0FBQ0QsR0FwRGdELEMsNENBQXRDSCxnQixDQUNKSSxjLEdBQWlCLEU7Ozs7Ozs7Ozs7OztBQStEMUI0QixPQUFPLENBQUNULEVBQVIsQ0FBVyxRQUFYLEVBQXFCLENBQUNJLElBQUQsRUFBT0UsTUFBUCxLQUFrQjtBQUNyQ1osRUFBQUEsT0FBTyxDQUFDQyxHQUFSLENBQWEsWUFBV2MsT0FBTyxDQUFDRixHQUFJLGFBQVlELE1BQU8sVUFBU0YsSUFBSyxHQUFyRTtBQUNBM0IsRUFBQUEsZ0JBQWdCLENBQUNFLG1CQUFqQjtBQUNELENBSEQiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgRXZlbnRFbWl0dGVyIGZyb20gJ2V2ZW50cydcbmltcG9ydCBjaGlsZFByb2Nlc3MgZnJvbSAnY2hpbGRfcHJvY2VzcydcblxuLy8gbWFuYWdlIGZvcmtlZCBzdWJwcm9jZXNzIGFsbG93aW5nIHRvIHJlc3RhcnQgdGhlIHN1YnByb2Nlc3Mgb24gZGVtYW5kLlxuLy8gUHJvY2VzcyBzaWduYWxzIC0gaHR0cDovL21hbjcub3JnL2xpbnV4L21hbi1wYWdlcy9tYW43L3NpZ25hbC43Lmh0bWxcbmV4cG9ydCBjbGFzcyBNYW5hZ2VTdWJwcm9jZXNzIGV4dGVuZHMgRXZlbnRFbWl0dGVyIHtcbiAgc3RhdGljIHN1YnByb2Nlc3NMaXN0ID0gW11cblxuICBzdGF0aWMgdGVybWluYXRlU3VicHJvY2VzcygpIHtcbiAgICBmb3IgKGxldCBzdWJwcm9jZXNzIG9mIE1hbmFnZVN1YnByb2Nlc3Muc3VicHJvY2Vzc0xpc3QpIHtcbiAgICAgIGlmICghc3VicHJvY2Vzcy5raWxsZWQpIHtcbiAgICAgICAgLy8gY29uc29sZS5sb2coJ3NlbmRpbmcga2lsbCB0byBzdWJwcm9jZXNzICcgKyBzdWJwcm9jZXNzLnBpZClcbiAgICAgICAgc3VicHJvY2Vzcy5raWxsKCdTSUdURVJNJylcbiAgICAgIH1cbiAgICB9XG4gIH1cblxuICBzdWJwcm9jZXNzIC8vIGNoaWxkIHN1YnByb2Nlc3NcbiAgY2xpQWRhcHRlclBhdGggLy8gdGhlIHBhdGggdG8gdGhlIGNsaSBlbnRyeXBvaW50IGZpbGUsIHRoYXQgd2lsbCByZWNlaXZlIGFyZ3VtZW50cyBmcm9tIHRoZSBjaGlsZCBwcm9jZXNzIGZvcmsgZnVuY3Rpb24gYW5kIHBhc3MgaXQgdG8gdGhlIHByb2dyYW1tYXRpYyBtb2R1bGUgYXBpLlxuICBhcmd1bWVudExpc3QgLy8gY2FjaGVkIGFyZ3VtZW50cyB0byBiZSB1c2VkIGZvciBydW5uaW5nIHN1YnByb2Nlc3Nlc1xuXG4gIGNvbnN0cnVjdG9yKHsgY2xpQWRhcHRlclBhdGggfSkge1xuICAgIHN1cGVyKClcbiAgICB0aGlzLmNsaUFkYXB0ZXJQYXRoID0gY2xpQWRhcHRlclBhdGhcbiAgICB0aGlzLnN1cHJvY2VzcyA9IG51bGxcbiAgfVxuXG4gIHJ1bkluU3VicHJvY2VzcygpIHtcbiAgICBpZiAodGhpcy5zdWJwcm9jZXNzKSB0aGlzLnN1YnByb2Nlc3Mua2lsbCgnU0lHVEVSTScpXG5cbiAgICB0aGlzLmFyZ3VtZW50TGlzdCA9IFsuLi4oYXJndW1lbnRzLmxlbmd0aCA9PSAwID8gdGhpcy5hcmd1bWVudExpc3QgfHwgW10gOiBhcmd1bWVudHMpXVxuXG4gICAgbGV0IHN0cmluZ2lmeUFyZ3MgPSBKU09OLnN0cmluZ2lmeSh0aGlzLmFyZ3VtZW50TGlzdCkgLy8gcGFyYW1ldHJzIGZvciBtb2R1bGUgdG8gYmUgcnVuIGluIHN1YnByb2Nlc3MuXG5cbiAgICAvLyBydW5uaW5nIGluIHN1YnByb2Nlc3MgcHJldmVudHMgYWxsb3dzIHRvIGNvbnRyb2wgdGhlIGFwcGxpY2F0aW9uIGFuZCB0ZXJtaW5hdGUgaXQgd2hlbiBuZWVkZWQuXG4gICAgY29uc29sZS5sb2coYOKAoiBFeGVjdXRpbmcgc3VicHJvY2VzczogXCIke3RoaXMuY2xpQWRhcHRlclBhdGh9ICR7c3RyaW5naWZ5QXJnc31cImApXG4gICAgdGhpcy5zdWJwcm9jZXNzID0gY2hpbGRQcm9jZXNzXG4gICAgICAuZm9yayh0aGlzLmNsaUFkYXB0ZXJQYXRoLCBbc3RyaW5naWZ5QXJnc10sIHtcbiAgICAgICAgc3RkaW86IFswLCAxLCAyLCAnaXBjJ10sXG4gICAgICAgIGV4ZWNBcmd2OiBbXG4gICAgICAgICAgLy8gJy0taW5zcGVjdC1icms9MTI3MicsIC8vIGluc3BlY3Qgc3VicHJvY2VzcyB3aXRoIHJhbmRvbSBwb3J0IHRvIHByZXZlbnQgY29uZmxpY3RzIHdpdGggdGhlIG1haW4gcHJvY2VzcyBpbiBjYXNlIGl0J3MgaW5zcGVjdCBmbGFnIHdhcyB0dXJuZWQgb24uXG4gICAgICAgICAgJy0tbm8tbGF6eScsIC8vIGZvciBkZWJ1Z2dpbmcgcHVycG9zZXMgd2lsbCBsb2FkIG1vZHVsZXMgc2VxdWVudGlhbGx5XG4gICAgICAgIF0sXG4gICAgICB9KVxuICAgICAgLm9uKCdtZXNzYWdlJywgbWVzc2FnZSA9PiB7XG4gICAgICAgIGlmIChtZXNzYWdlPy5zdGF0dXMgPT0gJ3JlYWR5JykgdGhpcy5lbWl0KCdyZWFkeScpXG4gICAgICB9KVxuICAgICAgLm9uKCdjbG9zZScsIGNvZGUgPT4ge1xuICAgICAgICBpZiAoY29kZSA9PT0gOCkgY29uc29sZS5lcnJvcignRXJyb3IgZGV0ZWN0ZWQsIHdhaXRpbmcgZm9yIGNoYW5nZXMuJylcbiAgICAgIH0pXG4gICAgLy8gY2hpbGRQcm9jZXNzLnVucmVmKCkgLy8gcHJldmVudCBwYXJlbnQgZnJvbSB3YWl0aW5nIHRvIGNoaWxkIHByb2Nlc3MgYW5kIHVuIHJlZmVyZW5jZSBjaGlsZCBmcm9tIHBhcmVudCdzIGV2ZW50IGxvb3AuIFdoZW4gY2hpbGQgcHJvY2VzcyBpcyByZWZlcmVuY2VkIGl0IGZvcmNlcyB0aGUgcGFyZW50IHRvIHdhaXQgZm9yIHRoZSBjaGlsZCB0byBleGl0IGJlZm9yZSBleGl0aW5nIGl0c2VsZi5cblxuICAgIHRoaXMuc3VicHJvY2Vzcy5vbignZXhpdCcsIChjb2RlLCBzaWduYWwpID0+IGNvbnNvbGUubG9nKGBbU3VicHJvY2VzcyAke3RoaXMuc3VicHJvY2Vzcy5waWR9XTogc2lnbmFsICR7c2lnbmFsfSwgY29kZSAke2NvZGV9O2ApKVxuXG4gICAgTWFuYWdlU3VicHJvY2Vzcy5zdWJwcm9jZXNzTGlzdC5wdXNoKHRoaXMuc3VicHJvY2VzcylcblxuICAgIHJldHVybiB0aGlzLnN1YnByb2Nlc3NcbiAgfVxufVxuXG4vLyBjbGVhbiB1cCBpZiBhbiBlcnJvciBnb2VzIHVuaGFuZGxlZCBvciBpbnRlcnJ1cHQgc2lnbmFsIHJlY2VpdmVkLlxuLy8gVE9ETzogbWFrZSBzdXJlIHRoZSBob29rcyBmb3IgcHJvY2VzcyBldmVudHMgYXJlIG5vdCBleGVjdXRlZC5cbi8vIHByb2Nlc3MuZXhpdCgwKSAvLyBwcm9jZXNzLmFib3J0KCkgIC8vIHByb2Nlc3Mua2lsbCgpXG4vLyBwcm9jZXNzLm9uKCdleGl0JywgKGNvZGUsIHNpZ25hbCkgPT4ge1xuLy8gICBjb25zb2xlLmxvZyhgW1Byb2Nlc3MgJHtwcm9jZXNzLnBpZH1dOiBzaWduYWwgJHtzaWduYWx9LCBjb2RlICR7Y29kZX07YClcbi8vICAgTWFuYWdlU3VicHJvY2Vzcy50ZXJtaW5hdGVTdWJwcm9jZXNzKClcbi8vIH0pXG4vLyBwcm9jZXNzLm9uKCdjbG9zZScsIChjb2RlLCBzaWduYWwpID0+IGNvbnNvbGUubG9nKGBbUHJvY2VzcyAke3Byb2Nlc3MucGlkfV06IHNpZ25hbCAke3NpZ25hbH0sIGNvZGUgJHtjb2RlfTtgKSlcbi8vIHByb2Nlc3Mub24oJ1NJR1RFUk0nLCAoY29kZSwgc2lnbmFsKSA9PiBjb25zb2xlLmxvZyhgW1Byb2Nlc3MgJHtwcm9jZXNzLnBpZH1dOiBzaWduYWwgJHtzaWduYWx9LCBjb2RlICR7Y29kZX07YCkpXG5wcm9jZXNzLm9uKCdTSUdJTlQnLCAoY29kZSwgc2lnbmFsKSA9PiB7XG4gIGNvbnNvbGUubG9nKGBbUHJvY2VzcyAke3Byb2Nlc3MucGlkfV06IHNpZ25hbCAke3NpZ25hbH0sIGNvZGUgJHtjb2RlfTtgKVxuICBNYW5hZ2VTdWJwcm9jZXNzLnRlcm1pbmF0ZVN1YnByb2Nlc3MoKVxufSlcbiJdfQ==
