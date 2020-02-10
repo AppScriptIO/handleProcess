@@ -31,7 +31,9 @@ export class ManageSubprocess extends EventEmitter {
     this.argumentList = [...(arguments.length == 0 ? this.argumentList || [] : arguments)]
 
     let stringifyArgs = JSON.stringify(this.argumentList) // parametrs for module to be run in subprocess.
+
     // running in subprocess prevents allows to control the application and terminate it when needed.
+    console.log(`• Executing subprocess: "${this.cliAdapterPath} ${stringifyArgs}"`)
     this.subprocess = childProcess
       .fork(this.cliAdapterPath, [stringifyArgs], {
         stdio: [0, 1, 2, 'ipc'],
@@ -46,7 +48,7 @@ export class ManageSubprocess extends EventEmitter {
       .on('close', code => {
         if (code === 8) console.error('Error detected, waiting for changes.')
       })
-      // childProcess.unref() // prevent parent from waiting to child process and un reference child from parent's event loop. When child process is referenced it forces the parent to wait for the child to exit before exiting itself.
+    // childProcess.unref() // prevent parent from waiting to child process and un reference child from parent's event loop. When child process is referenced it forces the parent to wait for the child to exit before exiting itself.
 
     this.subprocess.on('exit', (code, signal) => console.log(`[Subprocess ${this.subprocess.pid}]: signal ${signal}, code ${code};`))
 
